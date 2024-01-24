@@ -1,0 +1,48 @@
+﻿@page "/personas"
+@using System.Linq.Expressions
+@inject PersonasServices personaServices;
+@attribute [StreamRendering]
+
+<PageTitle>Consulta Personas</PageTitle>
+<h1><strong>Consulta Personas</strong></h1>
+
+@if(personaList.Count == 0)
+{
+	<p><em>Cargando...</em></p>
+}
+else
+{
+	<table class="table">
+		<thead>
+			<tr>
+				<th>Id</th>
+				<th>Nombre</th>
+				<th>Tel&eacute;fono</th>
+			</tr>
+		</thead>
+		<tbody>
+			@foreach(var person in personaList)
+			{
+				<tr>
+					<td>@person.PersonaId</td>
+					<td>@person.Nombre</td>
+					<td>@person.Telefono</td>
+				</tr>
+			}
+		</tbody>
+	</table>
+}
+
+
+@code {
+	public Personas persona { get; set; } = new Personas();
+	public List<Personas> personaList = new List<Personas>();
+
+	protected override async Task OnInitializedAsync()
+	{
+		await Task.Delay(500);
+		Expression<Func<Personas, bool>> criterio = persona => persona.PersonaId > 0;
+
+		personaList = await personaServices.Listar(criterio);
+	}
+}

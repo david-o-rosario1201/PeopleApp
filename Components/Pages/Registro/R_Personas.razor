@@ -1,0 +1,122 @@
+﻿@page "/personas"
+@inject PersonasServices personaServices;
+@rendermode InteractiveServer
+
+<PageTitle>Registro Personas</PageTitle>
+
+<div class="card shadow-lg mb-3">
+	<EditForm Model="persona" OnValidSubmit="Crear" FormName="FormularioPersonas">
+		<DataAnnotationsValidator />
+		<div class="container">
+			<div class="card-shadow lg">
+				@*Header*@
+				<div class="card-header">
+					<h3><strong>REGISTRO PERSONAS</strong></h3>
+				</div>
+				@*Body*@
+				<div class="card-body">
+					<div class="col-xs-12 col-sm-12 col-md-8 col-lg-6 col-xl-4"></div>
+					@*Id*@
+					<div class="row mb-3">
+						<div class="col-4" role="group">
+							<label for="idpersona" class="form-label"><strong>Id:</strong></label>
+							<div class="input-group">
+								<InputNumber id="idpersona" class="form-control form-control-sm" @bind-Value="persona.PersonaId" />
+								<button type="button" class="btn btn-primary" @onclick="Buscar">Buscar</button>
+							</div>
+						</div>
+					</div>
+					@*Nombre*@
+					<div class="row mb-3">
+						<label for="nombre" class="form-label"><strong>Nombre:</strong></label>
+                        <div class="col-4">
+							<InputText id="nombre" class="form-control form-control-sm" placeholder="Escriba su nombre" @bind-Value="persona.Nombre" />
+                            <ValidationMessage For="@(() => persona.Nombre)" />
+                        </div>
+                    </div>
+					@*Teléfono*@
+					<div class="row mb-3">
+						<div class="col-4">
+							<label for="telefono" class="form-label"><strong>Tel&eacute;fono:</strong></label>
+							<InputText id="telefono" class="form-control form-control-sm" placeholder="Escriba su numero de teléfono" @bind-Value="persona.Telefono"></InputText>
+							<ValidationMessage For="@(() => persona.Telefono)"></ValidationMessage>
+						</div>
+					</div>
+					@*Select*@
+					<div class="mb-3 col-4">
+						<label for="personaselect" class="form-label">PersonaId:</label>
+						<InputSelect @bind-Value="persona.PersonaId" class="form-select form-select-sm">
+							@foreach(var persona in personas)
+							{
+								<option value="@persona.PersonaId">@persona.Nombre</option>
+							}
+						</InputSelect>
+					</div>
+				</div>
+				@*Footer*@
+				<div class="card-footer d-flex justify-content-center">
+					<button type="submit" class="btn btn-outline-primary">
+						Crear
+					</button>
+				</div>
+			</div>
+		</div>
+		@mensaje
+	</EditForm>
+</div>
+
+@code {
+	public Personas persona { get; set; } = new Personas();
+	public string mensaje { get; set; } = string.Empty;
+	List<Personas> personas = new List<Personas>()
+	{
+			new Personas() {PersonaId = 1, Nombre = "Alta"},
+			new Personas() {PersonaId = 2, Nombre = "Media"},
+			new Personas() {PersonaId = 3, Nombre = "Baja"}
+	};
+
+	public async Task Crear()
+	{
+		if(await Validar())
+		{
+			mensaje = "Error, ya existe una persona con este nombre";
+		}
+
+		else
+		{
+			var crear = await personaServices.Crear(persona);
+			if (crear)
+				mensaje = "Los datos se han gurdado correctamente";
+			else
+				mensaje = "Error, los datos no se han podido guardar conrrectamente";
+		}
+	}
+
+	public async Task<bool> Validar()
+	{
+		var nombre = await personaServices.BuscarNombre(persona.Nombre);
+
+		if (nombre)
+			return true;
+
+		return false;
+	}
+
+	public async Task Buscar()
+	{
+		if (persona.PersonaId <= 0)
+			mensaje = "No se aceptan Id menores que 1";
+
+		else
+		{
+			var buscar = await personaServices.Buscar(persona);
+			if (buscar != null)
+			{
+				persona = buscar;
+				mensaje = "Persona encontrada";
+			}
+			else
+				mensaje = $"El id {persona.PersonaId} no fue enctrado";
+		}
+	}
+}
