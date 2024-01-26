@@ -42,7 +42,7 @@
 
 	protected override async Task OnInitializedAsync()
 	{
-		await Task.Delay(250);
+		await Task.Delay(500);
 
 		if (personaId > 0)
 			persona = await personasServices.Buscar(personaId);
