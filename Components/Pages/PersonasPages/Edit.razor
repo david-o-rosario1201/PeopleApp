@@ -1,5 +1,108 @@
-﻿<h3>Edit</h3>
+﻿@page "/edit"
+@page "/edit/personaId={personaId:int}"
+@rendermode InteractiveServer
+@inject PersonasServices personasServices;
+
+<PageTitle>Editar</PageTitle>
+
+<EditForm Model="persona" OnValidSubmit="Modificar" FormName="formularioEdit">
+	<div class="container">
+		<div class="card shadow-lg">
+			@*Header*@
+			<div class="card-header">
+				<h3><strong>Editar</strong></h3>
+				<a href="/details"><em>Details</em></a>
+			</div>
+			@*Body*@
+			<div class="card-body">
+				<div class="col-xs-12 col-sm-12 col-md-8 col-lg-6 col-xl-4"></div>
+				@*Id*@
+				<div class="mb-3">
+					<div class="col-4">
+						<label class="form-label" for="personaidd"><strong>Id:</strong></label>
+						<div class="input-group">
+							<InputNumber id="personaid" class="form-control" @bind-Value="persona.PersonaId"></InputNumber>
+							<button type="button" class="btn btn-outline-primary" @onclick="Buscar">Buscar</button>
+						</div>
+					</div>
+				</div>
+				@*Nombre*@
+				<div class="mb-3">
+					<div class="col-4">
+						<label class="form-label" for="nombre"><strong>Nombre:</strong></label>
+						<InputText id="nombre" class="form-control" @bind-Value="persona.Nombre" placeholder="Escribe un nombre"></InputText>
+						<ValidationMessage For="@(() => persona.Nombre)"></ValidationMessage>
+					</div>
+				</div>
+				@*Teléfono*@
+				<div class="mb-3">
+					<div class="col-4">
+						<label class="form-label" for="telefono"><strong>Tel&eacute;fono:</strong></label>
+						<InputText id="telefono" class="form-control" @bind-Value="persona.Telefono" placeholder="Escriba un numero de teléfono"></InputText>
+						<ValidationMessage For="@(() => persona.Telefono)"></ValidationMessage>
+					</div>
+				</div>
+			</div>
+			@*Footer*@
+			<div class="card-footer d-flex justify-content-center">
+				<button type="submit" class="btn btn-outline-primary">Modificar</button>
+			</div>
+		</div>
+	</div>
+	@mensaje
+</EditForm>
 
 @code {
+	[Parameter]
+	public int personaId { get; set; }
+	public Personas persona { get; set; } = new Personas();
+	public string mensaje { get; set; } = string.Empty;
 
+	protected override async Task OnInitializedAsync()
+	{
+		await Task.Delay(500);
+		if(personaId > 0)
+			persona = await personasServices.Buscar(personaId);
+	}
+
+	public async Task Modificar()
+	{
+		if (await Validar())
+			mensaje = "Error, este nombre no esta disponible";
+		else
+		{
+			var modificar = await personasServices.Crear(persona);
+			if (modificar)
+				mensaje = "Los datos se ha actualizado con exito";
+			else
+				mensaje = "Los datos no han podido ser actualizados";
+		}
+	}
+
+	public async Task<bool> Validar()
+	{
+		var nombre = await personasServices.BuscarNombre(persona.Nombre);
+		if (nombre)
+			return true;
+		else
+			return false;
+	}
+
+	public async Task Buscar()
+	{
+		if (persona.PersonaId <= 0)
+			mensaje = "No se aceptan Id menores que 1";
+
+		else
+		{
+			var buscar = await personasServices.Buscar(persona.PersonaId);
+			if (buscar != null)
+			{
+				persona = buscar;
+				mensaje = "La persona ha sido encontrada con exito";
+			}
+			else
+				mensaje = $"No existe persona con el id {persona.PersonaId}";
+		}
+	}
 }

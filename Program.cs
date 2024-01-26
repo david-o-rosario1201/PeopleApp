@@ -2,6 +2,7 @@ using PeopleApp.Components;
 using PeopleApp.Services;
 using PeopleApp.DAL;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Components;
 
 
 var builder = WebApplication.CreateBuilder(args);

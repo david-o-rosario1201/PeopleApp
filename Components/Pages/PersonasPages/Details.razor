@@ -1,5 +1,59 @@
-﻿<h3>Details</h3>
+﻿@page "/details"
+@inject PersonasServices personasServices;
+@attribute [StreamRendering]
 
+<PageTitle>Detalles</PageTitle>
+<div class="cotainer">
+	<div class="card - shadow-lg">
+		@*Header*@
+		<div class="card-header">
+			<h3><strong>Detalles</strong></h3>
+			<a href="/create"><em>Crear</em></a>
+		</div>
+		@*Body*@
+		<div class="card-body">
+			<div class="col-xs-12 col-sm-12 col-md-8 col-lg-6 col-xl-4"></div>
+			@if(personas.Count == 0)
+			{
+				<p><em>Cargado..</em></p>
+			}
+			else
+			{
+				<table class="table">
+					<thead>
+						<tr>
+							<th>Id</th>
+							<th>Nombre</th>
+							<th>Tel&eacute;fono</th>
+							<th></th>
+							<th></th>
+						</tr>
+					</thead>
+					<tbody>
+						@foreach(var person in personas)
+						{
+							<tr>
+								<td>@person.PersonaId</td>
+								<td>@person.Nombre</td>
+								<td>@person.Telefono</td>
+								<td><a href="/edit/personaId=@person.PersonaId"><em>Editar</em></a></td>
+								<td><a href="/delete/personaId=@person.PersonaId"><em>Eliminar</em></a></td>
+							</tr>
+						}
+					</tbody>
+				</table>
+			}
+		</div>
+	</div>
+</div>
 @code {
+	public Personas persona { get; set; } = new Personas();
+	public List<Personas> personas = new List<Personas>();
 
+	protected override async Task OnInitializedAsync()
+	{
+		await Task.Delay(500);
+		Expression<Func<Personas, bool>> criterio = persona => persona.PersonaId > 0;
+		personas = await personasServices.Listar(criterio);
+	}
 }

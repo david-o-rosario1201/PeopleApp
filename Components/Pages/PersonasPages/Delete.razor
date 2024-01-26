@@ -1,5 +1,68 @@
-﻿<h3>Delete</h3>
+﻿@page "/delete"
+@page "/delete/personaId={personaId:int}"
+@rendermode InteractiveServer
+@attribute [StreamRendering]
+@inject PersonasServices personasServices;
+@inject NavigationManager NavigationManager;
+
+<PageTitle>Eliminar</PageTitle>
+
+<div class="container">
+	<div class="card shadow-lg">
+		@*Header*@
+		<div class="card-header">
+			<h3><strong>Delete</strong></h3>
+		</div>
+		@*Body*@
+		<div class="card-body col-5">
+			<div class="col-xs-12 col-sm-12 col-md-8 col-lg-6 col-xl-4"></div>
+			<h3><strong>¿Estas seguro de que quieres eliminar esta persona?</strong></h3>
+			@*Datos*@
+			<div class="mb-1">
+				<p class="mb-0">Id: @persona.PersonaId</p>
+			</div>
+			<div class="mb-1">
+				<p class="mb-0">Nombre: @persona.Nombre</p>
+			</div>
+			<div class="mb-1">
+				<p class="mb-0">Tel&eacute;fono: @persona.Telefono</p>
+			</div>
+			<button type="button" class="btn btn-danger" @onclick="Eliminar">Eliminar</button>
+			<button type="button" class="btn btn-dark" @onclick="IrAPaginaDestino">Cancelar</button>
+		</div>
+		@mensaje
+	</div>
+</div>
 
 @code {
+	[Parameter]
+	public int personaId { get; set; }
+	public Personas persona { get; set; } = new Personas();
+	public string mensaje { get; set; } = string.Empty;
 
+	protected override async Task OnInitializedAsync()
+	{
+		await Task.Delay(250);
+
+		if (personaId > 0)
+			persona = await personasServices.Buscar(personaId);
+	}
+
+	public async Task Eliminar()
+	{
+		var eliminar = await personasServices.Eliminar(persona);
+		if (eliminar)
+		{
+			mensaje = "La Persona ha sido eliminada con exito";
+			await Task.Delay(2000);
+			IrAPaginaDestino();
+		}
+		else
+			mensaje = "No se ha podido eliminar la persona correctamente";
+	}
+
+	void IrAPaginaDestino()
+	{
+		NavigationManager.NavigateTo("/details");
+	}
 }

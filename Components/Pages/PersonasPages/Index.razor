@@ -1,37 +1,56 @@
 ﻿@page "/personas"
-@using System.Linq.Expressions
 @inject PersonasServices personaServices;
 @attribute [StreamRendering]
 
 <PageTitle>Consulta Personas</PageTitle>
-<h1><strong>Consulta Personas</strong></h1>
 
-@if(personaList.Count == 0)
-{
-	<p><em>Cargando...</em></p>
-}
-else
-{
-	<table class="table">
-		<thead>
-			<tr>
-				<th>Id</th>
-				<th>Nombre</th>
-				<th>Tel&eacute;fono</th>
-			</tr>
-		</thead>
-		<tbody>
-			@foreach(var person in personaList)
+<div class="container">
+	<div class="card shadow-lg">
+		@*Header*@
+		<div class="card-header">
+			<h3><strong>Consulta Personas</strong></h3>
+			<div class="d-flex align-items-start">
+				<div class="px-2">
+					<a href="/create"><em>Crear</em></a>
+				</div>
+				<a href="/details"><em>Detalles</em></a>
+			</div>
+		</div>
+		@*Body*@
+		<div class="card-body">
+			<div class="col-xs-12 col-sm-12 col-md-8 col-lg-6 col-xl-4"></div>
+			@if (personaList.Count == 0)
 			{
-				<tr>
-					<td>@person.PersonaId</td>
-					<td>@person.Nombre</td>
-					<td>@person.Telefono</td>
-				</tr>
+				<p><em>Cargando...</em></p>
 			}
-		</tbody>
-	</table>
-}
+			else
+			{
+				<table class="table">
+					<thead>
+						<tr>
+							<th>Id</th>
+							<th>Nombre</th>
+							<th>Tel&eacute;fono</th>
+						</tr>
+					</thead>
+					<tbody>
+						@foreach (var person in personaList)
+						{
+							<tr>
+								<td>@person.PersonaId</td>
+								<td>@person.Nombre</td>
+								<td>@person.Telefono</td>
+							</tr>
+						}
+					</tbody>
+				</table>
+			}
+			<div class="mb-3"></div>
+		</div>
+		@*Footer*@
+		<div class="card-footer"></div>
+	</div>
+</div>
 
 
 @code {

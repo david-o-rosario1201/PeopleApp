@@ -32,13 +32,17 @@ public class PersonasServices
 	public async Task<bool> Insertar(Personas persona)
 	{
 		_contexto.Personas.Add(persona);
-		return await _contexto.SaveChangesAsync() > 0;
+		var guardo = await _contexto.SaveChangesAsync() > 0;
+		_contexto.Entry(persona).State = EntityState.Detached;
+		return guardo;
 	}
 
 	public async Task<bool> Modificar(Personas persona)
 	{
 		_contexto.Update(persona);
-		return await _contexto.SaveChangesAsync() > 0;
+		var modifico = await _contexto.SaveChangesAsync() > 0;
+		_contexto.Entry(persona).State = EntityState.Detached;
+		return modifico;
 	}
 
 	public async Task<bool> Eliminar(Personas persona)
@@ -46,15 +50,14 @@ public class PersonasServices
 		var cantidad = await _contexto.Personas
 			.Where(p => p.PersonaId == persona.PersonaId)
 			.ExecuteDeleteAsync();
-
 		return cantidad > 0;
 	}
 
-	public async Task<Personas?> Buscar(Personas persona)
+	public async Task<Personas?> Buscar(int persona)
 	{
 		return await _contexto.Personas
 			.AsNoTracking()
-			.FirstOrDefaultAsync(p => p.PersonaId == persona.PersonaId);
+			.FirstOrDefaultAsync(p => p.PersonaId == persona);
 	}
 
 	public async Task<bool> BuscarNombre(string nombre)

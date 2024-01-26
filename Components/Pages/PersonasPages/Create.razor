@@ -1,32 +1,109 @@
 ﻿@page "/create"
 @inject PersonasServices personasServices;
+@rendermode InteractiveServer
 
-<EditForm Model="persona" OnValidSubmit="Crear">
+<EditForm Model="persona" OnValidSubmit="Crear" FormName="formularioPersonas">
 	<DataAnnotationsValidator/>
 	<div class="container">
 		<div class="card shadow-lg">
 			@*Header*@
 			<div class="card-header">
 				<h3><strong>Registro Personas</strong></h3>
+				<a href="/details"><em>Detalles</em></a>
 			</div>
 			@*Body*@
 			<div class="card-body">
 				<div class="col-xs-12 col-sm-12 col-md-8 col-lg-6 col-xl-4"></div>
 				@*ID*@
 				<div class="mb-3">
-					<label class="form-label" for="idpersona"><strong>Id:</strong></label>
+					<div class="col-4" role="group">
+						<label class="form-label" for="idpersona"><strong>Id:</strong></label>
+						<div class="input-group">
+							<InputNumber id="idpersona" class="form-control" @bind-Value="persona.PersonaId"></InputNumber>
+							<button type="button" @onclick="Buscar" class="btn btn-primary">Buscar</button>
+						</div>
+					</div> 
 				</div>
+				@*Nombre*@
+				<div class="mb-3">
+					<div class="col-4">
+						<label class="form-label" for="nombre"><strong>Nombre:</strong></label>
+						<InputText id="nombre" class="form-control" @bind-Value="persona.Nombre" placeholder="Escriba su nombre"></InputText>
+						<ValidationMessage For="@(() => persona.Nombre)"></ValidationMessage>
+					</div>
+				</div>
+				@*Teléfono*@
+				<div class="mb-3">
+					<div class="col-4">
+						<label class="form-label" for="telefono"><strong>Tel&eacute;fono</strong></label>
+						<InputText id="telefono" class="form-control" @bind-Value="persona.Telefono" placeholder="Escriba su numero de teléfono"></InputText>
+						<ValidationMessage For="@(() => persona.Telefono)"></ValidationMessage>
+					</div>
+				</div>
+				<div class="mb-3"></div>
+			</div>
+			@*Footer*@
+			<div class="card-footer d-flex justify-content-center">
+				<button type="submit" class="btn btn-outline-primary">Crear</button>
 			</div>
 		</div>
 	</div>
+	@mensaje
 </EditForm>
-<h3>Create</h3>
 
 @code {
 	public Personas persona { get; set; } = new Personas();
+	public string mensaje { get; set; } = string.Empty;
 
-	public void Crear()
+	public async Task Crear()
 	{
-		
+		Console.Write("Entro1");
+		if (await Validar())
+			mensaje = "Error, este nombre no esta disponible";
+		else
+		{
+			var crear = await personasServices.Crear(persona);
+			if (crear)
+			{
+				mensaje = "Los datos se han guardado con exito";
+				await Task.Delay(1000);
+				LimpiarPantalla();
+			}
+			else
+				mensaje = "Los datos no se han podido guardar correctamente";
+		}
+	}
+
+	public void LimpiarPantalla()
+	{
+		persona = new Personas();
+		mensaje = string.Empty;
+	}
+
+	public async Task<bool> Validar()
+	{
+		Console.Write("Entro2");
+		var nombre = await personasServices.BuscarNombre(persona.Nombre);
+		if (nombre)
+			return true;
+
+		return false;
+	}
+
+	public async Task Buscar()
+	{
+		if (persona.PersonaId <= 0)
+			mensaje = "No se aceptan Id menores que 1";
+		else
+		{
+			var buscar = await personasServices.Buscar(persona.PersonaId);
+			if (buscar != null)
+			{
+				persona = buscar;
+				mensaje = "Se ha encontrado la persona con exito";
+			}
+			else
+				mensaje = $"No se encontraron datos con el Id {persona.PersonaId}";
+		}
 	}
 }
